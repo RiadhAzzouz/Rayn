@@ -1,0 +1,237 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.automata.testing.framework</groupId>
+	<artifactId>java-mvn-spring-boot-test-parent</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<packaging>pom</packaging>
+
+	<name>Automata :: Automata Spring boot test parent</name>
+	<description>Multi module project for the testing case for Automata Backend Developers</description>
+
+	<modules>
+		<module>automata-commons</module>
+		<module>algorithm-services</module>
+		<module>post-service</module>
+		<module>user-service</module>
+	</modules>
+
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<!-- Import dependency management from Spring Boot -->
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring-boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>software.amazon.awssdk</groupId>
+				<artifactId>bom</artifactId>
+				<version>${aws-sdk.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- Do not forget to user this tutorial for using this in Eclipse : https://howtodoinjava.com/automation/lombok-eclipse-installation-examples/ -->
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>${lombok.version}</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<!-- Swagger is used to generate API documentation on every services -->
+			<dependency>
+				<groupId>io.springfox</groupId>
+				<artifactId>springfox-swagger2</artifactId>
+				<version>${swagger.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.springfox</groupId>
+				<artifactId>springfox-swagger-ui</artifactId>
+				<version>${swagger.version}</version>
+			</dependency>
+
+			<!-- Datasource drivers -->
+			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>${postgresql.version}</version>
+				<scope>runtime</scope>
+			</dependency>
+
+		</dependencies>
+	</dependencyManagement>
+	<build>
+		<resources>
+			<resource>
+				<filtering>false</filtering>
+				<directory>${basedir}/src/main/resources</directory>
+				<excludes>
+					<exclude>**/application*.properties</exclude>
+					<exclude>**/bootstrap*.properties</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<filtering>true</filtering>
+				<directory>${basedir}/src/main/resources</directory>
+				<includes>
+					<include>**/application*.properties</include>
+					<include>**/bootstrap.properties</include>
+				</includes>
+			</resource>
+		</resources>
+		<testResources>
+			<testResource>
+				<filtering>false</filtering>
+				<directory>src/test/resources</directory>
+				<excludes>
+					<exclude>**/application*.properties</exclude>
+					<exclude>**/bootstrap*.properties</exclude>
+				</excludes>
+			</testResource>
+			<testResource>
+				<filtering>true</filtering>
+				<directory>src/test/resources</directory>
+				<includes>
+					<include>**/application*.properties</include>
+					<include>**/bootstrap*.properties</include>
+				</includes>
+			</testResource>
+		</testResources>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<configuration>
+						<parameters>true</parameters>
+					</configuration>
+				</plugin>
+				<plugin>
+					<artifactId>maven-jar-plugin</artifactId>
+					<configuration>
+						<archive>
+							<manifest>
+								<mainClass>${start-class}</mainClass>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							</manifest>
+						</archive>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>${helper.plugin.version}</version>
+				<executions>
+					<execution>
+						<id>add-integration-test-source</id>
+						<goals>
+							<goal>add-test-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.basedir}/src/it/java</source>
+							</sources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>add-integration-test-resources</id>
+						<goals>
+							<goal>add-test-resource</goal>
+						</goals>
+						<configuration>
+							<resources>
+								<resource>
+									<directory>src/it/resources</directory>
+									<filtering>false</filtering>
+									<excludes>
+										<exclude>**/application*.properties</exclude>
+										<exclude>**/bootstrap*.properties</exclude>
+									</excludes>
+								</resource>
+								<resource>
+									<directory>src/it/resources</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>**/application*.properties</include>
+										<include>**/bootstrap*.properties</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<!-- Activating tasks on m2e -->
+	<profiles>
+		<profile>
+			<id>pic</id>
+			<!-- Activated properties, only for dev environment -->
+			<properties>
+				<spring.profiles.active>dev</spring.profiles.active>
+			</properties>
+		</profile>
+		<profile>
+			<id>m2eclipse-embedded</id>
+			<activation>
+				<property>
+					<name>m2e.version</name>
+				</property>
+			</activation>
+
+			<!-- Allow devTools in Eclipse Environment -->
+			<dependencies>
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-devtools</artifactId>
+					<optional>true</optional>
+				</dependency>
+			</dependencies>
+
+			<!-- Activated properties, only for dev environment -->
+			<properties>
+				<spring.profiles.active>dev</spring.profiles.active>
+			</properties>
+		</profile>
+	</profiles>
+
+	<!-- Propriétés et différentes versions utilisées dans l'application -->
+	<properties>
+		<!-- Par défaut, on n'active aucune profile (sauf en dev) -->
+		<spring.profiles.active></spring.profiles.active>
+
+		<!-- Propriétés diverses -->
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<java.version>17</java.version>
+		<resource.delimiter>@</resource.delimiter>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+
+		<!-- Frameworks version -->
+
+		<!-- Maven plugins version -->
+		<helper.plugin.version>3.0.0</helper.plugin.version>
+
+		<!-- For compatibility informations : https://projects.spring.io/spring-cloud/#release-trains -->
+		<spring-boot.version>2.6.3</spring-boot.version>
+		<aws-sdk.version>2.17.121</aws-sdk.version>
+		<swagger.version>2.9.2</swagger.version>
+		<lombok.version>1.18.22</lombok.version>
+		<postgresql.version>42.2.2</postgresql.version>
+
+		<spring-boot-maven-plugin.version>2.1.13.RELEASE</spring-boot-maven-plugin.version>
+	</properties>
+
+</project>
